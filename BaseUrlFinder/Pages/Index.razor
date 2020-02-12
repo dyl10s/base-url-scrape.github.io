@@ -93,6 +93,7 @@
             var curSearch = needSearchUrl.Dequeue();
             await searchBaseUrl(curSearch);
             JSRuntime.InvokeVoidAsync("plotData", "outputPlot", baseUrls.Keys.ToArray(), baseUrls.Values.ToArray());
+            this.StateHasChanged();
         }
     }
 
