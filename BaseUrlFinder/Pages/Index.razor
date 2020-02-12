@@ -1,7 +1,120 @@
 ﻿@page "/"
+@inject HttpClient client
 
-<h1>Hello, world!</h1>
+<div class="row pt-5">
+    <div class="col-12 text-center">
+        <h3>Base Url Crawler</h3>
+    </div>
+</div>
 
-Welcome to your new app.
+<div class="row pt-3">
+    <div class="col-7">
+        <input @bind="StartingUrl" class="form-control" placeholder="URL ex. https://www.google/com)"/>
+    </div>
+    <div class="col-5">
+        <button class="btn btn-primary btn-block" @onclick="startSearch">Find Base Urls</button>
+    </div>
+</div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="row pt-3 justify-content-center">
+    <div class="col-4 text-center">
+        <h4 class="w-100">Current Base Urls Found</h4>
+        <label class="w-100">@baseUrls.Count</label>
+    </div>
+    <div class="col-4 text-center">
+        <h4 class="w-100">Current Base Urls To Search</h4>
+        <label class="w-100">@needSearchUrl.Count</label>
+    </div>
+    <div class="col-4 text-center">
+        <h4 class="w-100">Current Base Url</h4>
+        <label class="w-100">@currentBaseUrl</label>
+    </div>
+</div>
+
+<div class="row pt-5">
+    <div class="col-12">
+        <h1 class="w-100 text-center">Output</h1>
+        <div class="overflow-auto">
+            @output
+        </div>
+    </div>
+</div>
+
+@code{
+    string StartingUrl = "https://www.google.com";
+    static Queue<String> needSearchUrl = new Queue<string>();
+    static List<String> baseUrls = new List<string>();
+    MarkupString output = (MarkupString)"";
+    string currentBaseUrl = "";
+
+    async void startSearch()
+    {
+        output = (MarkupString)"";
+        this.StateHasChanged();
+
+        Uri url;
+        Uri.TryCreate(StartingUrl, UriKind.Absolute, out url);
+        if(url == null)
+        {
+            OutputWriteLine("Invalid URL");
+            return;
+        }
+        var baseurl = url.Scheme + "://" + url.Host;
+        OutputWriteLine("Got base url: " + baseurl);
+        baseUrls.Add(baseurl);
+        needSearchUrl.Enqueue(baseurl);
+
+        client.Timeout = new TimeSpan(0, 0, 5);
+
+        while(needSearchUrl.Count > 0)
+        {
+            var curSearch = needSearchUrl.Dequeue();
+            await searchBaseUrl(curSearch);
+            this.StateHasChanged();
+        }
+
+        OutputWriteLine("All Done!");
+    }
+
+    async Task searchBaseUrl(string baseUrl)
+    {
+        try
+        {
+            currentBaseUrl = baseUrl;
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://cors-anywhere.herokuapp.com/" + baseUrl),
+                Method = HttpMethod.Get
+            };
+            var siteResponse = await client.SendAsync(request);
+            var siteHtml = await siteResponse.Content.ReadAsStringAsync();
+
+            var items = siteHtml.splitString("href=\"")[1..];
+            foreach (var item in items)
+            {
+                Uri newUrl;
+                Uri.TryCreate(item, UriKind.Absolute, out newUrl);
+                if (newUrl != null)
+                {
+                    var newBaseurl = newUrl.Scheme + "://" + newUrl.Host;
+                    if (newUrl.Scheme == "https" && !baseUrls.Contains(newBaseurl))
+                    {
+                        baseUrls.Add(newBaseurl);
+                        needSearchUrl.Enqueue(newBaseurl);
+                        OutputWriteLine(newBaseurl);
+                    }
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            OutputWriteLine("Error Scraping: " + baseUrl + " " + e.GetBaseException().Message);
+        }
+    }
+
+    void OutputWriteLine(string newLine)
+    {
+        output = (MarkupString) (newLine + "<br />" + output);
+        this.StateHasChanged();
+    }
+}
