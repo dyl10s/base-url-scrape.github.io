@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -8,6 +8,8 @@
     <base href="/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/site.css" rel="stylesheet" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="js/Plotly.js"></script>
 </head>
 
 <body>
@@ -26,10 +28,10 @@
         // When the single page app is loaded further down in this file,
         // the correct url will be waiting in the browser's history for
         // the single page app to route accordingly.
-        (function(l) {
+        (function (l) {
             if (l.search) {
                 var q = {};
-                l.search.slice(1).split('&').forEach(function(v) {
+                l.search.slice(1).split('&').forEach(function (v) {
                     var a = v.split('=');
                     q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
                 });

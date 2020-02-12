@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject HttpClient client
+@inject IJSRuntime JSRuntime
 
 <div class="row pt-5">
     <div class="col-12 text-center">
@@ -12,20 +13,27 @@
         <input @bind="StartingUrl" class="form-control" placeholder="URL ex. https://www.google/com)"/>
     </div>
     <div class="col-5">
-        <button class="btn btn-primary btn-block" @onclick="startSearch">Find Base Urls</button>
+        @if (running)
+        {
+            <button class="btn btn-danger btn-block" @onclick="stopSearch">Stop Running</button>
+        }
+        else
+        {
+            <button class="btn btn-primary btn-block" @onclick="startSearch">Find Base Urls</button>
+        }
     </div>
 </div>
 
 <div class="row pt-3 justify-content-center">
-    <div class="col-4 text-center">
+    <div class="col-md-4 col-sm-6 text-center">
         <h4 class="w-100">Current Base Urls Found</h4>
         <label class="w-100">@baseUrls.Count</label>
     </div>
-    <div class="col-4 text-center">
+    <div class="col-md-4 col-sm-6 text-center">
         <h4 class="w-100">Current Base Urls To Search</h4>
         <label class="w-100">@needSearchUrl.Count</label>
     </div>
-    <div class="col-4 text-center">
+    <div class="col-md-4 col-sm-12 text-center">
         <h4 class="w-100">Current Base Url</h4>
         <label class="w-100">@currentBaseUrl</label>
     </div>
@@ -33,9 +41,8 @@
 
 <div class="row pt-5">
     <div class="col-12">
-        <h1 class="w-100 text-center">Output</h1>
-        <div class="overflow-auto">
-            @output
+        <div class="overflow-auto" id="outputPlot">
+            
         </div>
     </div>
 </div>
@@ -43,12 +50,30 @@
 @code{
     string StartingUrl = "https://www.google.com";
     static Queue<String> needSearchUrl = new Queue<string>();
-    static List<String> baseUrls = new List<string>();
+    static Dictionary<string, string> baseUrls = new Dictionary<string, string>();
     MarkupString output = (MarkupString)"";
     string currentBaseUrl = "";
+    bool running = false;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            client.Timeout = new TimeSpan(0, 0, 5);
+        }
+    }
+
+    void stopSearch()
+    {
+        running = false;
+    }
 
     async void startSearch()
     {
+        needSearchUrl = new Queue<string>();
+        baseUrls = new Dictionary<string, string>();
+
+        running = true;
         output = (MarkupString)"";
         this.StateHasChanged();
 
@@ -56,24 +81,19 @@
         Uri.TryCreate(StartingUrl, UriKind.Absolute, out url);
         if(url == null)
         {
-            OutputWriteLine("Invalid URL");
+            running = false;
             return;
         }
         var baseurl = url.Scheme + "://" + url.Host;
-        OutputWriteLine("Got base url: " + baseurl);
-        baseUrls.Add(baseurl);
+        baseUrls.Add(baseurl, "");
         needSearchUrl.Enqueue(baseurl);
 
-        client.Timeout = new TimeSpan(0, 0, 5);
-
-        while(needSearchUrl.Count > 0)
+        while(needSearchUrl.Count > 0 && running)
         {
             var curSearch = needSearchUrl.Dequeue();
             await searchBaseUrl(curSearch);
-            this.StateHasChanged();
+            JSRuntime.InvokeVoidAsync("plotData", "outputPlot", baseUrls.Keys.ToArray(), baseUrls.Values.ToArray());
         }
-
-        OutputWriteLine("All Done!");
     }
 
     async Task searchBaseUrl(string baseUrl)
@@ -97,24 +117,16 @@
                 if (newUrl != null)
                 {
                     var newBaseurl = newUrl.Scheme + "://" + newUrl.Host;
-                    if (newUrl.Scheme == "https" && !baseUrls.Contains(newBaseurl))
+                    if (newUrl.Scheme == "https" && !baseUrls.ContainsKey(newBaseurl))
                     {
-                        baseUrls.Add(newBaseurl);
+                        baseUrls.Add(newBaseurl, baseUrl);
                         needSearchUrl.Enqueue(newBaseurl);
-                        OutputWriteLine(newBaseurl);
                     }
                 }
             }
         }
         catch(Exception e)
         {
-            OutputWriteLine("Error Scraping: " + baseUrl + " " + e.GetBaseException().Message);
         }
-    }
-
-    void OutputWriteLine(string newLine)
-    {
-        output = (MarkupString) (newLine + "<br />" + output);
-        this.StateHasChanged();
     }
 }
