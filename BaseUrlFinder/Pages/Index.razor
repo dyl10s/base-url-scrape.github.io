@@ -104,7 +104,7 @@
             currentBaseUrl = baseUrl;
             var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri("https://cors-anywhere.herokuapp.com/" + baseUrl),
+                RequestUri = new Uri("https://no-cors.000webhostapp.com/no-cors.php?url=" + baseUrl),
                 Method = HttpMethod.Get
             };
             var siteResponse = await client.SendAsync(request);
