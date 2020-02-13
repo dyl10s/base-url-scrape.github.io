@@ -104,7 +104,7 @@
             currentBaseUrl = baseUrl;
             var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri("http://no-cors.epizy.com/no-cors.php?url=" + baseUrl),
+                RequestUri = new Uri("https://no-cors.ml/no-cors.php?url=" + baseUrl),
                 Method = HttpMethod.Get
             };
             var siteResponse = await client.SendAsync(request);
