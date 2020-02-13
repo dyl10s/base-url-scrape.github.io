@@ -12,7 +12,7 @@ The website will create a tree chart that is interactable by the user. When you 
 
 
 #### Current Problem
-Reverse proxy has a limit of 50,000 requests per day so if the site is not working properly it could be because that max has been hit for the day. Working on a local version that you can run without being dependent on a remote cors proxy.
+Currently am using a reverse proxy to allow me to make cors requests so if site is not working properly it could be because you were rate limited. Working on a local version that you can run without being dependent on a remote cors proxy.
 
 #### WASM vs JavaScript Versions
-This project was originally just to try out hosting a static blazor project on github pages however its not the best tool for the job here. I also have the source code to a javascript alternative that runs much faster. It will hit that 50,000 request limit much faster so I am leaving the WASM version on the website for now.
+This project was originally just to try out hosting a static blazor project on github pages however its not the best tool for the job here. I also have the source code to a javascript alternative that runs much faster. It will hit that rate limit much faster so I am leaving the WASM version on the website for now.
