@@ -1,0 +1,57 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row pt-5">
+            <div class="col-12 text-center">
+                <h3>Base Url Crawler</h3>
+                <label>Once finished generation of the chart can be slow as there will be lots of data</label>
+            </div>
+        </div>
+
+        <div class="row pt-3">
+            <div class="col-7">
+                <input class="form-control" placeholder="URL ex. https://www.google/com" value="https://stackoverflow.com/" id="UserUrl" />
+            </div>
+            <div class="col-5">
+                <button class="btn btn-danger btn-block mt-0" onclick="stopScrape()" id="stop">Stop Running and Generate Plot</button>
+                <button class="btn btn-primary btn-block mt-0" onclick="startScrape()" id="start">Find Base Urls</button>
+            </div>
+        </div>
+
+        <div class="row pt-3 justify-content-center">
+            <div class="col-md-4 col-sm-6 text-center">
+                <h4 class="w-100">Current Base Urls Found</h4>
+                <label class="w-100" id="UrlsFound"></label>
+            </div>
+            <div class="col-md-4 col-sm-6 text-center">
+                <h4 class="w-100">Current Base Urls To Search</h4>
+                <label class="w-100" id="UrlsSearch"></label>
+            </div>
+            <div class="col-md-4 col-sm-12 text-center">
+                <h4 class="w-100">Current Base Url</h4>
+                <label class="w-100" id="UrlsCurrent"></label>
+            </div>
+        </div>
+
+        <div class="row pt-5">
+            <div class="col-12">
+                <div class="overflow-auto" id="outputPlot">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="Main.js"></script>
+</body>
+
+</html>
